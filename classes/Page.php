@@ -22,6 +22,7 @@ class Page
             <a href="index.php">index</a><br>
             <a href="messages.php">messages</a><br>
             <a href="message_add.php">add new message</a><br>
+            <a href="role_i_upraw.php">roles and permissions</a><br>
             <?php
     }
 }

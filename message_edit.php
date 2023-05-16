@@ -22,6 +22,7 @@ if (isset($_REQUEST['logout'])) {
     <?php
     if (!empty($_SESSION['login'])) {
         echo $_SESSION['login'];
+        
     } else {
         echo 'niezalogowany';
     }

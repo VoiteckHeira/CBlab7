@@ -32,6 +32,7 @@ include_once "classes/Page.php";
 include_once "classes/Db.php";
 include_once "classes/Filter.php";
 require './htmlpurifier-4.15.0/library/HTMLPurifier.auto.php';
+include_once 'classes/privileges/Privileges.php';
 Page::display_header("Messages");
 
 ?>
@@ -39,6 +40,17 @@ Page::display_header("Messages");
     <?php
     if (!empty($_SESSION['login'])) {
         echo $_SESSION['login'];
+
+        // echo 'Rola: ';
+        // foreach ($roleIds as $roleId) {
+        //     echo $roleId . ' ';
+        // }
+    
+        // echo '<br>Lista uprawnień: ';
+        // foreach ($privilegeIds as $privilegeId)
+        //     echo $privilegeId . ' ';
+    
+
     } else {
         echo 'niezalogowany';
     }

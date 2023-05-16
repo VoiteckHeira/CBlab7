@@ -18,17 +18,7 @@ if (isset($_REQUEST['logout'])) {
     unset($_SESSION['login']);
 }
 
-?>
-<h5>
-    <?php
-    if (!empty($_SESSION['login'])) {
-        echo $_SESSION['login'];
-    } else {
-        echo 'niezalogowany';
-    }
-    ?>
-</h5>
-<?php
+
 
 include_once "classes/Page.php";
 include_once "classes/Pdo.php";
@@ -43,6 +33,19 @@ $purifier = new HTMLPurifier($config);
 
 Page::display_header("Main page");
 $Pdo = new Pdo_();
+
+if (!empty($_SESSION['login'])) {
+    echo 'Zalogowany jako: </br>';
+    echo $_SESSION['login'];
+    echo '</br>';
+    $login = $_SESSION['login'];
+    $Pdo->get_role($login);
+    $Pdo->get_privileges($login);
+
+} else {
+    echo 'niezalogowany';
+}
+
 
 // Create a new Db object
 

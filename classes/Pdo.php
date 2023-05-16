@@ -304,33 +304,122 @@ class Pdo_
         }
     }
 
+    //    public function get_roles_with_privileges($login)
+//    {
+//        $login = $this->purifier->purify($login);
+//        try {
+//            $sql = "SELECT r.role_name, p.name FROM role r"
+//                . " INNER JOIN role_privilege rp ON r.id = rp.id_role"
+//                . " INNER JOIN privilege p ON p.id = rp.privilege_id"
+//                . " INNER JOIN user_role ur ON ur.id_role = r.id"
+//                . " INNER JOIN user u ON u.id = ur.id_user"
+//                . " WHERE u.login = :login";
+//            $stmt = $this->db->prepare($sql);
+//            $stmt->execute(['login' => $login]);
+//            $data = $stmt->fetchAll();
+//
+//            foreach ($data as $row) {
+//                $role = $row['role_name'];
+//                $privilege = $row['name'];
+//                $_SESSION[$role][$privilege] = 'YES';
+//            }
+//
+//            $data['status'] = 'success';
+//            echo '</br> Roles and privileges set<br/>';
+//            return $data;
+//        } catch (Exception $e) {
+//            print 'Exception' . $e->getMessage();
+//            echo 'Exception' . $e->getMessage();
+//        }
+//
+//        return [
+//            'status' => 'failed'
+//        ];
+//    }
+    public function get_role($login)
+    {
+        $login = $this->purifier->purify($login);
+
+        try {
+            $sql = "SELECT r.role_name FROM role r"
+                . " INNER JOIN user_role ur ON ur.id_role = r.id"
+                . " INNER JOIN user u ON u.id = ur.id_user"
+                . " WHERE u.login = :login";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['login' => $login]);
+            $role = $stmt->fetchColumn();
+            if ($role) {
+                echo "Rola: " . $role . "<br/>";
+            } else {
+                echo "Brak przypisanej roli dla użytkownika<br/>";
+            }
+        } catch (Exception $e) {
+            print 'Exception' . $e->getMessage();
+            echo 'Exception' . $e->getMessage();
+        }
+    }
     public function get_privileges($login)
     {
         $login = $this->purifier->purify($login);
+
         try {
-            $sql = "SELECT p.id,p.name FROM privilege p"
-                . " INNER JOIN user_privilege up ON p.id=up.id_privilege"
-                . " INNER JOIN user u ON u.id=up.id_user"
-                . " WHERE u.login=:login";
+            $sql = "SELECT p.name FROM privilege p"
+                . " INNER JOIN role_privilege rp ON rp.privilege_id = p.id"
+                . " INNER JOIN role r ON r.id = rp.id_role"
+                . " INNER JOIN user_role ur ON ur.id_role = r.id"
+                . " INNER JOIN user u ON u.id = ur.id_user"
+                . " WHERE u.login = :login";
+
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['login' => $login]);
+            $privileges = $stmt->fetchAll();
+            if ($privileges) {
+                echo "Przywilej: " . "<br/>";
+                foreach ($privileges as $privilege) {
+                    echo "- " . $privilege['name'] . "<br/>";
+                }
+            } else {
+                echo "Brak przypisanych przywilejów dla użytkownika<br/>";
+            }
+        } catch (Exception $e) {
+            print 'Exception' . $e->getMessage();
+            echo 'Exception' . $e->getMessage();
+        }
+    }
+
+    public function get_roles_with_privileges($login)
+    {
+        $login = $this->purifier->purify($login);
+        try {
+            $sql = "SELECT r.role_name, p.name FROM role r"
+                . " INNER JOIN role_privilege rp ON r.id = rp.id_role"
+                . " INNER JOIN privilege p ON p.id = rp.privilege_id"
+                . " INNER JOIN user_role ur ON ur.id_role = r.id"
+                . " INNER JOIN user u ON u.id = ur.id_user"
+                . " WHERE u.login = :login";
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['login' => $login]);
             $data = $stmt->fetchAll();
+
             foreach ($data as $row) {
+                $role = $row['role_name'];
                 $privilege = $row['name'];
-                $_SESSION[$privilege] = 'YES';
+                $_SESSION[$role][$privilege] = 'YES';
             }
+
             $data['status'] = 'success';
+            echo 'Roles and privileges set<br/>';
             return $data;
         } catch (Exception $e) {
             print 'Exception' . $e->getMessage();
+            echo 'Exception' . $e->getMessage();
         }
+
         return [
             'status' => 'failed'
         ];
     }
-
-
-
 
 
 

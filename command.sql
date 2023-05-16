@@ -197,3 +197,9 @@ id 	role_name
 2 	Moderator 
 3 	User 
 4 	New
+
+--role for username/login
+SELECT r.role_name FROM role r 
+INNER JOIN user_role ur ON ur.id_role = r.id
+INNER JOIN user u ON u.id = ur.id_user 
+WHERE u.login = "essa";
