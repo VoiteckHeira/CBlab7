@@ -28,7 +28,7 @@ class Pdo_
         }
     }
 
-    public function add_user($login, $email, $password, $twofa)
+    public function add_user($login, $email, $password, $password2, $role_name, $twofa)
     {
 
         $salt = random_bytes(16);
@@ -44,9 +44,9 @@ class Pdo_
 
         try {
             $sql = "INSERT INTO 
-                        `user`( `login`, `email`, `hash`, `salt`, `id_status`, `password_form`, `2fa`) 
-                    VALUES 
-                        (:login,:email,:hash,:salt,:id_status,:password_form,:2fa)";
+                    `user`( `login`, `email`, `hash`, `salt`, `id_status`, `password_form`, `2fa`) 
+                VALUES 
+                    (:login,:email,:hash,:salt,:id_status,:password_form,:2fa)";
 
             $password = hash('sha512', $password . $salt . $pepper, false);
 
@@ -61,22 +61,40 @@ class Pdo_
                 '2fa' => (int) $twofa,
             ];
             $this->db->prepare($sql)->execute($data);
-            echo 'user added';
+            $id_user = $this->db->lastInsertId(); // get the last inserted id
+            // echo $id_role;
+            $id_role = $role_name;
+
+            $sql = "INSERT INTO user_role(id_user, id_role, issue_time, expire_time) 
+                VALUES (:id_user, :id_role, :issue_time, :expire_time)";
+            $data = [
+                'id_user' => $id_user,
+                'id_role' => $id_role,
+                'issue_time' => date('Y-m-d'),
+                'expire_time' => null
+            ];
+            $this->db->prepare($sql)->execute($data);
+
+            echo ' <br> user added';
 
 
 
-            $sql2 = "INSERT INTO 
-                        `user_role`(`id_user`, `id_role`) 
-                    VALUES 
-                        (:id_user,:id_role)";
-
+            // Dodaj uprawnienia dla użytkownika w tabeli user_privilege
+            $sql = "INSERT INTO user_privilege(id_user, id_privilege) 
+                SELECT :id_user, privilege_id 
+                FROM role_privilege 
+                WHERE id_role = :id_role";
+            $data = [
+                'id_user' => $id_user,
+                'id_role' => $id_role
+            ];
+            $this->db->prepare($sql)->execute($data);
 
         } catch (Exception $e) {
 
             print 'Exception' . $e->getMessage();
         }
     }
-
     public function log_user_in($login, $password)
     {
         $login = $this->purifier->purify($login);

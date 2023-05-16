@@ -1,6 +1,6 @@
 --MySQL commands
 CREATE TABLE privilege(
-    id int PRIMARY KEY,
+    id int PRIMARY KEY AUTO_INCREMENT,
     id_parent_privilege int,
     name varchar(100),
     active tinyint,
@@ -8,7 +8,7 @@ CREATE TABLE privilege(
 );
 
 CREATE TABLE role(
-    id smallint PRIMARY KEY,
+    id smallint PRIMARY KEY AUTO_INCREMENT,
     role_name varchar(30),
     description text
 );
@@ -89,27 +89,27 @@ REFERENCES privilege(id);
 INSERT INTO role (id, role_name, description)
 VALUES (1, 'Administrator', 'Manages system settings and user accounts'),
        (2, 'Moderator', 'Moderates discussions and manages users'),
-       (3, 'User', 'Standard user role with limited privileges');
-       (4, 'New', 'New user role with limited privileges')
+       (3, 'User', 'Standard user role with limited privileges'),
+       (4, 'New', 'New user role with limited privileges');
 
 -- Add the two privileges to the privilege table
 INSERT INTO privilege (id, name, active, asset_url)
 VALUES (1, 'add message', 1, '/privileges/add_message'),
        (2, 'delete message', 1, '/privileges/delete_message'),
        (3, 'edit message', 1, '/privileges/edit_message'),
-       (4, 'dispay message', 1, '/privileges/display_message')
-       (5, 'create role', 1, '/privileges/create_role')
-       (6, 'delete role', 1, '/privileges/delete_role')
-       (7, 'edit role', 1, '/privileges/edit_role')
-       (8, 'display role', 1, '/privileges/display_role')
-       (9, 'create user', 1, '/privileges/create_user')
-       (10, 'delete user', 1, '/privileges/delete_user')
-       (11, 'edit user', 1, '/privileges/edit_user')
-       (12, 'display user', 1, '/privileges/display_user')
-       (13, 'create privilege', 1, '/privileges/create_privilege')
-       (14, 'delete privilege', 1, '/privileges/delete_privilege')
-       (15, 'edit privilege', 1, '/privileges/edit_privilege')
-       (16, 'display privilege', 1, '/privileges/display_privilege')
+       (4, 'dispay message', 1, '/privileges/display_message'),
+       (5, 'create role', 1, '/privileges/create_role'),
+       (6, 'delete role', 1, '/privileges/delete_role'),
+       (7, 'edit role', 1, '/privileges/edit_role'),
+       (8, 'display role', 1, '/privileges/display_role'),
+       (9, 'create user', 1, '/privileges/create_user'),
+       (10, 'delete user', 1, '/privileges/delete_user'),
+       (11, 'edit user', 1, '/privileges/edit_user'),
+       (12, 'display user', 1, '/privileges/display_user'),
+       (13, 'create privilege', 1, '/privileges/create_privilege'),
+       (14, 'delete privilege', 1, '/privileges/delete_privilege'),
+       (15, 'edit privilege', 1, '/privileges/edit_privilege'),
+       (16, 'display privilege', 1, '/privileges/display_privilege');
 
 
 
@@ -190,3 +190,10 @@ VALUES  (1, 42, 1),
         (16, 42, 16);
 
 
+
+Tabela role
+id 	role_name 
+1 	Administrator 
+2 	Moderator 
+3 	User 
+4 	New

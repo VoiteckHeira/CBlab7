@@ -32,20 +32,30 @@ if (isset($_REQUEST['logout'])) {
 
 include_once "classes/Page.php";
 include_once "classes/Pdo.php";
+include_once "classes/Db.php";
+include_once "classes/Filter.php";
+require './htmlpurifier-4.15.0/library/HTMLPurifier.auto.php';
 
+$db = new Db("localhost", "news", "root", "");
+require './htmlpurifier-4.15.0/library/HTMLPurifier.auto.php';
+$config = HTMLPurifier_Config::createDefault();
+$purifier = new HTMLPurifier($config);
 
 Page::display_header("Main page");
 $Pdo = new Pdo_();
+
+// Create a new Db object
 
 if (isset($_REQUEST['add_user'])) {
     $login = $_REQUEST['login'];
     $email = $_REQUEST['email'];
     $password = $_REQUEST['password'];
     $password2 = $_REQUEST['password2'];
+    $role = $_REQUEST['role'];
     $twofa = !empty($_REQUEST['2fa']);
 
     if ($password == $password2) {
-        $Pdo->add_user($login, $email, $password, $twofa);
+        $Pdo->add_user($login, $email, $password, $password2, $role, $twofa);
     } else {
         echo 'Passwords doesn\'t match';
     }
@@ -110,12 +120,22 @@ if (isset($_REQUEST['change_password'])) {
             <td>role</td>
             <td>
                 <label for="role"></label>
-                <select name="role" id="role" name="getRolesRegister">
-                    <option value="1">Moderator</option>
-                    <option value="2">Admin</option>
-                    <option value="3">User</option>
-                    <option value="4">New</option>
-                </select>
+                <?php
+                $where_clause = "";
+                $sql = "SELECT * FROM role" . $where_clause;
+                $stmt = $db->pdo->prepare($sql);
+                $stmt->execute();
+                $roles = $stmt->fetchAll(PDO::FETCH_OBJ);
+                foreach ($roles as $role) {
+                    echo '<input type="radio" id="role" name="role" value="' . $role->id . '">' . $role->role_name . '<br>';
+                }
+                //<select name="role" id="role" name="getRolesRegister">
+                //    <option value="1">Moderator</option>
+                //    <option value="2">Admin</option>
+                //    <option value="3">User</option>
+                //    <option value="4">New</option>
+                //</select>
+                ?>
             </td>
         </tr>
         <tr>

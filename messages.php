@@ -115,7 +115,7 @@ if (isset($_REQUEST['add_message'])) {
 <P> Messages</P>
 <?php
 $where_clause = "";
-// filtering messages
+// filtering messages+
 if (isset($_REQUEST['filter_messages'])) {
     $string = $_REQUEST['string'];
     $where_clause = " and name LIKE '%" . $string . "%'";
