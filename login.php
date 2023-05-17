@@ -1,27 +1,12 @@
 <?php
-session_start();
+include_once "session.php";
+make_session();
+?>
+<?php
 
-if (isset($_SESSION['session_expire'])) {
-    if (time() - $_SESSION['session_expire'] > (30 * 60)) {
-        session_unset();
-        session_destroy();
-
-        header("Location: index.php");
-    } else {
-        $_SESSION['session_expire'] = time();
-    }
-}
 
 ?>
-<h5>
-    <?php
-    if (!empty($_SESSION['login'])) {
-        echo $_SESSION['login'];
-    } else {
-        echo 'niezalogowany';
-    }
-    ?>
-</h5>
+
 <?php
 
 include_once "classes/Page.php";

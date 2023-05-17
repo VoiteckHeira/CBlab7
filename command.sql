@@ -16,7 +16,7 @@ CREATE TABLE role(
 CREATE TABLE role_privilege(
     id int PRIMARY KEY,
     id_role smallint,
-    privilege_id int,
+    id_privilege int,
     issue_time date,
     expire_time date
 );
@@ -64,7 +64,7 @@ REFERENCES privilege(id);
 -- Create foreign key relationship between privilege and role_privilege tables
 ALTER TABLE role_privilege
 ADD CONSTRAINT fk_role_privilege_privilege_id
-FOREIGN KEY (privilege_id)
+FOREIGN KEY (id_privilege)
 REFERENCES privilege(id);
 
 -- Create foreign key relationship between role and user_role tables
@@ -203,3 +203,17 @@ SELECT r.role_name FROM role r
 INNER JOIN user_role ur ON ur.id_role = r.id
 INNER JOIN user u ON u.id = ur.id_user 
 WHERE u.login = "essa";
+
+przykład
+DELETE FROM `role_privilege` WHERE `role_privilege`.`id` = 29;
+DELETE FROM `role` WHERE `role`.`id` = 7;
+DELETE FROM `role_privilege` WHERE `role_privilege`.`id` = 29;
+DELETE FROM `role` WHERE `role`.`id` = 8;
+DELETE FROM `role_privilege` WHERE `role_privilege`.`id` = 29;
+DELETE FROM `role` WHERE `role`.`id` = 9;
+DELETE FROM `role_privilege` WHERE `role_privilege`.`id` = 29;
+DELETE FROM `role` WHERE `role`.`id` = 10;
+DELETE FROM `role_privilege` WHERE `role_privilege`.`id` = 29;
+DELETE FROM `role` WHERE `role`.`id` = 11;
+DELETE FROM `role_privilege` WHERE `role_privilege`.`id` = 29;
+DELETE FROM `role` WHERE `role`.`id` = 12;

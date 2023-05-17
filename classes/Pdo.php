@@ -304,38 +304,7 @@ class Pdo_
         }
     }
 
-    //    public function get_roles_with_privileges($login)
-//    {
-//        $login = $this->purifier->purify($login);
-//        try {
-//            $sql = "SELECT r.role_name, p.name FROM role r"
-//                . " INNER JOIN role_privilege rp ON r.id = rp.id_role"
-//                . " INNER JOIN privilege p ON p.id = rp.privilege_id"
-//                . " INNER JOIN user_role ur ON ur.id_role = r.id"
-//                . " INNER JOIN user u ON u.id = ur.id_user"
-//                . " WHERE u.login = :login";
-//            $stmt = $this->db->prepare($sql);
-//            $stmt->execute(['login' => $login]);
-//            $data = $stmt->fetchAll();
-//
-//            foreach ($data as $row) {
-//                $role = $row['role_name'];
-//                $privilege = $row['name'];
-//                $_SESSION[$role][$privilege] = 'YES';
-//            }
-//
-//            $data['status'] = 'success';
-//            echo '</br> Roles and privileges set<br/>';
-//            return $data;
-//        } catch (Exception $e) {
-//            print 'Exception' . $e->getMessage();
-//            echo 'Exception' . $e->getMessage();
-//        }
-//
-//        return [
-//            'status' => 'failed'
-//        ];
-//    }
+
     public function get_role($login)
     {
         $login = $this->purifier->purify($login);
@@ -421,7 +390,44 @@ class Pdo_
         ];
     }
 
+    function post_new_role()
+    {
 
+        try {
+            $db = new PDO('mysql:host=localhost;dbname=news', 'root', '');
+            $role_name = $_POST['role_name'];
+            $description = $_POST['description'];
+
+            $id_role = $role_name;
+
+            $sql = "INSERT INTO role(role_name, description) 
+            VALUES (:role_name, :description)";
+
+            $data = [
+                'role_name' => $role_name,
+                'description' => $description
+            ];
+            $db->prepare($sql)->execute($data);
+
+            $id_role = $db->lastInsertId();
+            $issue_time = date("Y-m-d");
+
+            $sql = "INSERT INTO role_privilege(id_role, privilege_id, issue_time, expire_time) 
+                values (:id_role, :privilege_id, :issue_time, :expire_time)";
+            $data = [
+                'id_role' => $id_role,
+                'privilege_id' => $privilege_id,
+                'issue_time' => $issue_time,
+                'expire_time' => NULL
+            ];
+
+            $db->prepare($sql)->execute($data);
+
+        } catch (PDOException $e) {
+            echo $e->getMessage();
+        }
+
+    }
 
 
 

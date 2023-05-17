@@ -2,11 +2,30 @@
 include_once "session.php";
 make_session();
 ?>
-
 <?php
 
+session_start();
+
+if (isset($_SESSION['session_expire'])) {
+    if (time() - $_SESSION['session_expire'] > (30 * 60)) {
+        session_unset();
+        session_destroy();
+
+        header("Location: index.php");
+        exit();
+    } else {
+        $_SESSION['session_expire'] = time();
+    }
+}
+
+if (isset($_REQUEST['logout'])) {
+    unset($_SESSION['login']);
+}
+
+
+
 include_once "classes/Page.php";
-include_once "classes/privileges/create_role.php";
+
 include_once "classes/Db.php";
 include_once "classes/Filter.php";
 require './htmlpurifier-4.15.0/library/HTMLPurifier.auto.php';
@@ -17,6 +36,19 @@ $config = HTMLPurifier_Config::createDefault();
 $purifier = new HTMLPurifier($config);
 
 Page::display_header("Main page");
+$Pdo = new Pdo_();
+
+if (!empty($_SESSION['login'])) {
+    echo 'Zalogowany jako: </br>';
+    echo $_SESSION['login'];
+    echo '</br>';
+    $login = $_SESSION['login'];
+    $Pdo->get_role($login);
+    $Pdo->get_privileges($login);
+
+} else {
+    echo 'niezalogowany';
+}
 
 
 // Create a new Db object
@@ -57,8 +89,6 @@ if (isset($_REQUEST['change_password'])) {
 
 
 ?>
-<!-- <input type="button" value="create new role" onclick="location.href='/classes/privileges/create_role.php';" /> -->
-
 <H2> Main page</H2>
 <!---------------------------------------------------------------------->
 <hr>
@@ -189,7 +219,6 @@ if (isset($_REQUEST['change_password'])) {
     <H2> Main page</H2>
     <?php
     Page::display_navigation();
-
 ?>
 <?php endif; ?>
 
