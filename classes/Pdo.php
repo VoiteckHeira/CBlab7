@@ -357,6 +357,61 @@ class Pdo_
         }
     }
 
+    public function get_all_roles()
+    {
+        try {
+            $sql = "SELECT * FROM role";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            $roles = $stmt->fetchAll();
+            if ($roles) {
+                echo "Role: " . "<br/>";
+                foreach ($roles as $role) {
+                    echo "- " . $role['role_name'] . "<br/>";
+                }
+            } else {
+                echo "Brak przypisanych ról dla użytkownika<br/>";
+            }
+        } catch (Exception $e) {
+            print 'Exception' . $e->getMessage();
+            echo 'Exception' . $e->getMessage();
+        }
+
+    }
+
+    public function get_all_privileges()
+    {
+
+        try {
+            $sql = "SELECT * FROM privilege";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            $privileges = $stmt->fetchAll();
+            if ($privileges) {
+                echo "Przywileje: " . "<br/>";
+                foreach ($privileges as $privilege) {
+                    echo "- " . $privilege['name'] . "<br/>";
+                }
+            } else {
+                echo "Brak przypisanych przywilejów dla użytkownika<br/>";
+            }
+        } catch (Exception $e) {
+            print 'Exception' . $e->getMessage();
+            echo 'Exception' . $e->getMessage();
+        }
+
+    }
+
+    public function show_all_roles_and_privileges()
+    {
+        echo "<hr/>";
+        echo "Role i przywileje: <br/>";
+        $this->get_all_roles();
+        echo "<br/>";
+        $this->get_all_privileges();
+        echo "<hr/>";
+    }
+
     public function get_roles_with_privileges($login)
     {
         $login = $this->purifier->purify($login);
@@ -389,46 +444,46 @@ class Pdo_
             'status' => 'failed'
         ];
     }
+    /*
+        function post_new_role($login)
+        {
 
-    function post_new_role()
-    {
+            try {
+                $db = new PDO('mysql:host=localhost;dbname=news', 'root', '');
+                $role_name = $_POST['role_name'];
+                $description = $_POST['description'];
 
-        try {
-            $db = new PDO('mysql:host=localhost;dbname=news', 'root', '');
-            $role_name = $_POST['role_name'];
-            $description = $_POST['description'];
+                $id_role = $role_name;
 
-            $id_role = $role_name;
+                $sql = "INSERT INTO role(role_name, description) 
+                VALUES (:role_name, :description)";
 
-            $sql = "INSERT INTO role(role_name, description) 
-            VALUES (:role_name, :description)";
+                $data = [
+                    'role_name' => $role_name,
+                    'description' => $description
+                ];
+                $db->prepare($sql)->execute($data);
 
-            $data = [
-                'role_name' => $role_name,
-                'description' => $description
-            ];
-            $db->prepare($sql)->execute($data);
+                $id_role = $db->lastInsertId();
+                $issue_time = date("Y-m-d");
 
-            $id_role = $db->lastInsertId();
-            $issue_time = date("Y-m-d");
+                $sql = "INSERT INTO role_privilege(id_role, privilege_id, issue_time, expire_time) 
+                    values (:id_role, :privilege_id, :issue_time, :expire_time)";
+                $data = [
+                    'id_role' => $id_role,
+                    'privilege_id' => $privilege_id,
+                    'issue_time' => $issue_time,
+                    'expire_time' => NULL
+                ];
 
-            $sql = "INSERT INTO role_privilege(id_role, privilege_id, issue_time, expire_time) 
-                values (:id_role, :privilege_id, :issue_time, :expire_time)";
-            $data = [
-                'id_role' => $id_role,
-                'privilege_id' => $privilege_id,
-                'issue_time' => $issue_time,
-                'expire_time' => NULL
-            ];
+                $db->prepare($sql)->execute($data);
 
-            $db->prepare($sql)->execute($data);
+            } catch (PDOException $e) {
+                echo $e->getMessage();
+            }
 
-        } catch (PDOException $e) {
-            echo $e->getMessage();
         }
-
-    }
-
+    */
 
 
 } // END OF FILE

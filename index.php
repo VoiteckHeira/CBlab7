@@ -6,7 +6,7 @@ make_session();
 <?php
 
 include_once "classes/Page.php";
-include_once "classes/privileges/create_role.php";
+//include_once "classes/privileges/create_role.php";
 include_once "classes/Db.php";
 include_once "classes/Filter.php";
 require './htmlpurifier-4.15.0/library/HTMLPurifier.auto.php';
@@ -56,10 +56,15 @@ if (isset($_REQUEST['change_password'])) {
 
 
 
-?>
-<!-- <input type="button" value="create new role" onclick="location.href='/classes/privileges/create_role.php';" /> -->
 
+?>
+
+<hr>
 <H2> Main page</H2>
+<!-- <button onclick="show_all_roles()">Wyświetl role i uprawnienia</button> -->
+
+
+
 <!---------------------------------------------------------------------->
 <hr>
 <P> Register new user</P>
@@ -181,7 +186,9 @@ if (isset($_REQUEST['change_password'])) {
     <form method="post" action="index.php">
 
         <input type="submit" id="submit" value="Logout" name="logout">
+
     </form>
+    <hr>
     <?php
     include_once "classes/Page.php";
     Page::display_header("Main page");
@@ -192,7 +199,7 @@ if (isset($_REQUEST['change_password'])) {
 
 ?>
 <?php endif; ?>
-
+<hr>
 
 <!-- </body>-->
 <!--</html>-->

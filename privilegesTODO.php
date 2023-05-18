@@ -47,4 +47,37 @@ wybieramy
 2. jebane chyba trzeba dodać dodawanie uprawnień poza rolą
 2. "Zapisz listę uprawnień w sesji."
 4. "Podczas wyświetlania strony pokazuj użytkownikowi tylko te elementy, do których ma uprawnienia."
+
+-- do zrobienia
+1. usunąć poprzednie wyswietlania edycje itd z PDO i robić nową klase z nimi
+
+klasa privileges
+funkcje:
+- show all roles and privileges
+- dispay messages
+- display role for user
+- display users
+- add message
+- delete message
+- edit message
+- create role
+- delete role
+- edit role
+
+- create user
+- delete user
+- edit user
+
+- create privilege
+- delete privilege
+- edit privilege
+- display privilege
+
+
+
+
+
+
+
+
 */
