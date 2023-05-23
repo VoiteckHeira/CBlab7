@@ -64,8 +64,7 @@ funkcje:
 - delete role
 - edit role
 
-- create user
-- delete user
+
 - edit user
 
 - create privilege
@@ -73,7 +72,8 @@ funkcje:
 - edit privilege
 - display privilege
 
-
+pobiera login z sesji, pobiera privilegez z bazy i sprawdza czy takie privileges jest w bazie
+wtedy pozwala na wykonanie funkcji
 
 
 
