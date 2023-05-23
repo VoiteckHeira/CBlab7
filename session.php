@@ -1,11 +1,11 @@
 <?php
 include_once "classes/Pdo.php";
 include_once "classes/Db.php";
+include_once "classes/Privileges.php";
 function make_session()
 {
     session_start();
-    $db = new Db("localhost", "news", "root", "");
-    $Pdo = new Pdo_();
+    $Priv = new PrivilegeManager_();
     if (isset($_SESSION['session_expire'])) {
         if (time() - $_SESSION['session_expire'] > (30 * 60)) {
             session_unset();
@@ -26,9 +26,9 @@ function make_session()
         echo $_SESSION['login'];
         echo '</br>';
         $login = $_SESSION['login'];
-        $Pdo->get_role($login);
-        $Pdo->get_privileges($login);
-
+        $Priv->get_role($login);
+        $Priv->get_privileges($login);
+        $Priv->check_privileges($login);
     } else {
         echo 'niezalogowany';
     }

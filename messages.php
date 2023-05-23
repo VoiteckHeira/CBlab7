@@ -70,6 +70,7 @@ if (isset($_REQUEST['add_message'])) {
     $stmt->execute();
     $messages = $stmt->fetchAll(PDO::FETCH_OBJ);
 
+
     foreach ($messages as $msg):
         echo $msg->id . ". " . $msg->message . "<br>";
     endforeach;
@@ -97,7 +98,7 @@ if (count($messages)) {
         ?>
         <tr>
             <td>
-                <?php echo $counter++ ?>
+                <?php echo $msg->id ?>
             </td>
             <td>
                 <?php echo $msg->name ?>
@@ -106,7 +107,7 @@ if (count($messages)) {
                 <?php echo $msg->message ?>
             </td>
             <form method="post" action="message_action.php">
-                <input type="hidden" name="message_id" id="message_id" value="<?php echo $msg->id ?>" />
+                <input type="number" name="message_id" id="message_id" value="<?php echo $msg->id ?>" />
                 <?php
                 if (isset($_SESSION['delete message']))
                     echo '<td><input type="submit" id= "submit" value="Delete" name="delete_message"></td>';

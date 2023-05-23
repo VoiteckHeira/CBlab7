@@ -9,6 +9,7 @@ include_once "classes/Page.php";
 //include_once "classes/privileges/create_role.php";
 include_once "classes/Db.php";
 include_once "classes/Filter.php";
+include_once "classes/Privileges.php";
 require './htmlpurifier-4.15.0/library/HTMLPurifier.auto.php';
 
 $db = new Db("localhost", "news", "root", "");
@@ -66,74 +67,70 @@ if (isset($_REQUEST['change_password'])) {
 
 
 <!---------------------------------------------------------------------->
-<hr>
-<P> Register new user</P>
-<form method="post" action="index.php">
-    <table>
-        <tr>
-            <td>login</td>
-            <td>
-                <label for="name"></label>
-                <input required type="text" name="login" id="login" size="40" />
-            </td>
-        </tr>
-        <tr>
-            <td>email</td>
-            <td>
-                <label for="name"></label>
-                <input required type="text" name="email" id="email" size="40" />
-            </td>
-        </tr>
-        <tr>
-            <td>password</td>
-            <td>
-                <label for="name"></label>
-                <input required type="text" name="password" id="password" size="40" />
-            </td>
-        </tr>
-        <tr>
-            <td>repeat password</td>
-            <td>
-                <label for="name"></label>
-                <input required type="text" name="password2" id="password2" size="40" />
-            </td>
-        </tr>
-        <tr>
-            <td>role</td>
-            <td>
-                <label for="role"></label>
-                <?php
-                $where_clause = "";
-                $sql = "SELECT * FROM role" . $where_clause;
-                $stmt = $db->pdo->prepare($sql);
-                $stmt->execute();
-                $roles = $stmt->fetchAll(PDO::FETCH_OBJ);
-                foreach ($roles as $role) {
-                    echo '<input required type="radio" id="role" name="role" value="' . $role->id . '">' . $role->role_name . '<br>';
-                }
-                //<select name="role" id="role" name="getRolesRegister">
-                //    <option value="1">Moderator</option>
-                //    <option value="2">Admin</option>
-                //    <option value="3">User</option>
-                //    <option value="4">New</option>
-                //</select>
-                ?>
-            </td>
-        </tr>
-        <tr>
-        <tr>
-            <td>turn on 2fa?</td>
-            <td>
-                <label for="2fa"></label>
-                <input type="checkbox" id="2fa" name="2fa" />
-            </td>
-        </tr>
-    </table>
-    <input type="submit" id="submit" value="Create account" name="add_user">
-</form>
-<!---------------------------------------------------------------------->
-
 <?php if (empty($_SESSION['login'])): ?>
+    <hr>
+
+    <P> Register new user</P>
+    <form method="post" action="index.php">
+        <table>
+            <tr>
+                <td>login</td>
+                <td>
+                    <label for="name"></label>
+                    <input required type="text" name="login" id="login" size="40" />
+                </td>
+            </tr>
+            <tr>
+                <td>email</td>
+                <td>
+                    <label for="name"></label>
+                    <input required type="text" name="email" id="email" size="40" />
+                </td>
+            </tr>
+            <tr>
+                <td>password</td>
+                <td>
+                    <label for="name"></label>
+                    <input required type="text" name="password" id="password" size="40" />
+                </td>
+            </tr>
+            <tr>
+                <td>repeat password</td>
+                <td>
+                    <label for="name"></label>
+                    <input required type="text" name="password2" id="password2" size="40" />
+                </td>
+            </tr>
+            <tr>
+                <td>role</td>
+                <td>
+                    <label for="role"></label>
+                    <?php
+                    $where_clause = "";
+                    $sql = "SELECT * FROM role" . $where_clause;
+                    $stmt = $db->pdo->prepare($sql);
+                    $stmt->execute();
+                    $roles = $stmt->fetchAll(PDO::FETCH_OBJ);
+                    foreach ($roles as $role) {
+                        echo '<input required type="radio" id="role" name="role" value="' . $role->id . '">' . $role->role_name . '<br>';
+                    }
+                    ?>
+                </td>
+            </tr>
+            <tr>
+            <tr>
+                <td>turn on 2fa?</td>
+                <td>
+                    <label for="2fa"></label>
+                    <input type="checkbox" id="2fa" name="2fa" />
+                </td>
+            </tr>
+        </table>
+        <input type="submit" id="submit" value="Create account" name="add_user">
+    </form>
+    <!---------------------------------------------------------------------->
+
+
 
     <hr>
     <P> Log in</P>
