@@ -27,8 +27,9 @@ function make_session()
         echo '</br>';
         $login = $_SESSION['login'];
         $Priv->get_role($login);
-        $Priv->get_privileges($login);
+        //$Priv->get_privileges($login);
         $Priv->check_privileges($login);
+        $Priv->show_privileges_v2($login);
     } else {
         echo 'niezalogowany';
     }

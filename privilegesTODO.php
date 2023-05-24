@@ -75,9 +75,56 @@ funkcje:
 pobiera login z sesji, pobiera privilegez z bazy i sprawdza czy takie privileges jest w bazie
 wtedy pozwala na wykonanie funkcji
 
+wyswietlanie tylko tych elementó do których uzytkownik ma uprawnienia
+uzywamy session, funkcja jak przy sprawdzaniu uprawnień
 
+// Plik z funkcjami (np. functions.php)
+class MyClass {
+public function function1() {
+// Kod funkcji 1
+}
 
+public function function2() {
+// Kod funkcji 2
+}
 
+public function function3() {
+// Kod funkcji 3
+}
+
+// ... Dodaj pozostałe funkcje
+}
+
+// Plik, który wywołuje funkcje na podstawie uprawnień użytkownika (np. index.php)
+session_start();
+
+// Sprawdź, czy użytkownik jest zalogowany
+if (isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'];
+
+// Pobierz uprawnienia użytkownika z bazy danych na podstawie $user_id
+// ...
+
+// Utwórz obiekt klasy, która zawiera funkcje
+$myClass = new MyClass();
+
+// Tablica funkcji, które użytkownik może wywołać
+$allowed_functions = [
+'function1',
+'function2',
+'function3',
+// ... Dodaj pozostałe funkcje
+];
+
+// Wywołaj tylko te funkcje, do których użytkownik ma uprawnienia
+foreach ($allowed_functions as $function_name) {
+if (in_array($function_name, $user_permissions)) {
+call_user_func([$myClass, $function_name]);
+}
+}
+} else {
+// Użytkownik nie jest zalogowany - przekieruj go na stronę logowania lub wyświetl komunikat o braku dostępu
+}
 
 
 */

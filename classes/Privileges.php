@@ -22,11 +22,12 @@ class PrivilegeManager_
     public function getAllRoles()
     {
         try {
-            $sql = "SELECT * FROM roles";
-            $result = $this->db->prepare($sql);
+            $sql = "SELECT * FROM role";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
             $roles = array();
-            while ($row = $result->fetch()) {
-                $roles[$row['id']] = $row['name'];
+            while ($row = $stmt->fetch()) {
+                $roles[$row['id']] = $row['role_name'];
             }
             return $roles;
         } catch (PDOException $e) {
@@ -34,157 +35,40 @@ class PrivilegeManager_
         }
     }
 
-    public function check_privileges($login)
+    public function getAllPrivileges()
     {
-        $login = $this->purifier->purify($login);
         try {
-            $sql = "SELECT p.id,p.name FROM privilege p"
-                . " INNER JOIN user_privilege up ON p.id=up.id_privilege"
-                . " INNER JOIN user u ON u.id=up.id_user"
-                . " WHERE u.login=:login";
+            $sql = "SELECT * FROM privilege";
             $stmt = $this->db->prepare($sql);
-            $stmt->execute(['login' => $login]);
-            $data = $stmt->fetchAll();
-            foreach ($data as $row) {
-                $privilege = $row['name'];
-                $_SESSION[$privilege] = 'YES';
-
+            $stmt->execute();
+            $privileges = array();
+            while ($row = $stmt->fetch()) {
+                $privileges[$row['id']] = $row['name'];
             }
-
-            $data['status'] = 'success';
-            return $data;
-        } catch (Exception $e) {
-            print 'Exception' . $e->getMessage();
-        }
-        return [
-            'status' => 'failed'
-        ];
-    }
-
-    public function hasPrivilege($userId, $privilegeId)
-    {
-        // Sprawdź, czy użytkownik ma przypisaną daną uprawnienie
-        $sql = "SELECT COUNT(*) FROM user_privilege WHERE id_user = :userId AND id_privilege = :privilegeId";
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
-        $stmt->bindParam(':privilegeId', $privilegeId, PDO::PARAM_INT);
-        $stmt->execute();
-
-        $count = $stmt->fetchColumn();
-        return ($count > 0);
-    }
-    public function showMessages($userId)
-    {
-        if ($this->hasPrivilege($userId, 3)) {
-            // Wykonaj operację wyświetlania wiadomości
-            // ...
-            echo "Wyświetlono wiadomości.";
-        } else {
-            echo "Brak uprawnień do wyświetlania wiadomości.";
+            return $privileges;
+        } catch (PDOException $e) {
+            die();
         }
     }
 
-
-    public function addMessage($userId, $message)
+    public function displayRolesAndPrivileges()
     {
-        if ($this->hasPrivilege($userId, 1)) {
-            // Wykonaj operację dodawania wiadomości
-            // ...
-            echo "Dodano wiadomość: " . $message;
-        } else {
-            echo "Brak uprawnień do dodawania wiadomości.";
-        }
-    }
+        $roles = $this->getAllRoles();
+        $privileges = $this->getAllPrivileges();
 
-    public function deleteMessage($userId, $messageId)
-    {
-        if ($this->hasPrivilege($userId, 2)) {
-            // Wykonaj operację usuwania wiadomości
-            // ...
-            echo "Usunięto wiadomość o ID: " . $messageId;
-        } else {
-            echo "Brak uprawnień do usuwania wiadomości.";
-        }
-    }
-
-    public function getUserRoleAndPrivileges($userId)
-    {
-        $sql = "SELECT role.id AS role_id, privilege.id AS privilege_id
-                FROM user
-                LEFT JOIN role ON user.role_id = role.id
-                LEFT JOIN role_privilege ON role.id = role_privilege.role_id
-                LEFT JOIN privilege ON role_privilege.privilege_id = privilege.id
-                WHERE user.id = :userId";
-
-        $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
-        $stmt->execute();
-
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $roleIds = array();
-        $privilegeIds = array();
-
-        foreach ($result as $row) {
-            if (!in_array($row['role_id'], $roleIds)) {
-                $roleIds[] = $row['role_id'];
+        if (!empty($roles) && !empty($privileges)) {
+            echo "Role:<br>";
+            foreach ($roles as $roleId => $roleName) {
+                echo " - $roleName<br>";
             }
-
-            if (!in_array($row['privilege_id'], $privilegeIds)) {
-                $privilegeIds[] = $row['privilege_id'];
+            echo "<br>Przywileje:<br>";
+            foreach ($privileges as $privilegeId => $privilegeName) {
+                echo " -- $privilegeName<br>";
             }
+        } else {
+            echo "Brak dostępnych ról i przywilejów.";
         }
-
-        return array('role_ids' => $roleIds, 'privilege_ids' => $privilegeIds);
     }
-    public function showRolesAndPrivileges($pdo, $userId)
-    {
-
-        $privilegeManager = new PrivilegeManager_();
-
-        // Pobierz ID zalogowanego użytkownika (zmień to na odpowiedni sposób w zależności od twojego systemu uwierzytelniania)
-        $loggedInUserId = $_SESSION['user_id'];
-
-        // Pobierz rolę i uprawnienia dla zalogowanego użytkownika
-        $userData = $privilegeManager->getUserRoleAndPrivileges($loggedInUserId);
-
-        // Zapisz rolę i uprawnienia w zmiennych
-        $roleIds = $userData['role_ids'];
-        $privilegeIds = $userData['privilege_ids'];
-
-        echo '
-        <!-- Wyświetl rolę i listę uprawnień dla zalogowanego użytkownika -->
-        <h3>Rola:</h3>
-        <ul>
-            <?php foreach ($roleIds as $roleId): ?>
-                <li>
-                    <?php echo $roleId; ?>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-            
-        <h3>Lista uprawnień:</h3>
-        <ul>
-            <?php foreach ($privilegeIds as $privilegeId): ?>
-                <li>
-                    <?php echo $privilegeId; ?>
-                </li>
-            <?php endforeach; ?>
-        </ul>';
-    }
-
-    public function show_messages()
-    {
-        $sql = "SELECT * FROM messages";
-        $result = $this->db->prepare($sql);
-        $messages = array();
-        while ($row = $result->fetch()) {
-            $messages[$row['id']] = $row['message'];
-        }
-        return $messages;
-    }
-
-    //funkcja do wyświetlania roli zalogowanego użytkownika
     public function get_role($login)
     {
         $login = $this->purifier->purify($login);
@@ -208,6 +92,90 @@ class PrivilegeManager_
             echo 'Exception' . $e->getMessage();
         }
     }
+    public function check_privileges($login)
+    {
+        $login = $this->purifier->purify($login);
+        try {
+            $sql = "SELECT p.id,p.name FROM privilege p"
+                . " INNER JOIN user_privilege up ON p.id=up.id_privilege"
+                . " INNER JOIN user u ON u.id=up.id_user"
+                . " WHERE u.login=:login";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute(['login' => $login]);
+            $data = $stmt->fetchAll();
+            foreach ($data as $row) {
+                $privilege = $row['name'];
+                $_SESSION[$privilege] = 'YES';
+            }
+            $data['status'] = 'success';
+            return $data;
+        } catch (Exception $e) {
+            print 'Exception' . $e->getMessage();
+        }
+        return [
+            'status' => 'failed'
+        ];
+    }
+
+    public function show_privileges_v2($login)
+    {
+        $result = $this->check_privileges($login);
+        if ($result['status'] === 'success') {
+            foreach ($result as $key => $value) {
+                if ($key !== 'status') {
+                    $privilege = $value['name'];
+                    echo " - " . $privilege . "<br>";
+                }
+            }
+        } else {
+            echo 'error';
+        }
+
+    }
+
+    public function get_all_users()
+    {
+
+        try {
+            $sql = "SELECT * FROM user";
+
+            $stmt = $this->db->prepare($sql);
+            $role = $stmt->fetchColumn();
+            if ($role) {
+                echo "Rola: " . $role . "<br/>";
+            } else {
+                echo "Brak przypisanej roli dla użytkownika<br/>";
+            }
+        } catch (Exception $e) {
+            print 'Exception' . $e->getMessage();
+            echo 'Exception' . $e->getMessage();
+        }
+    }
+
+
+    public function popup($what)
+    {
+        if ($what == 'dodano') {
+            echo '<script type="text/javascript">';
+            echo 'alert("Dodano")';
+            echo '</script>';
+        } else if ($what == 'usunieto') {
+            echo '<script type="text/javascript">';
+            echo 'alert("Usunięto")';
+            echo '</script>';
+        } else if ($what == 'zedytowano') {
+            echo '<script type="text/javascript">';
+            echo 'alert("Zedytowano")';
+            echo '</script>';
+        } else if ($what == 'blad') {
+            echo '<script type="text/javascript">';
+            echo 'alert("Błąd")';
+            echo '</script>';
+        }
+
+    }
+    //funkcja do wyświetlania roli zalogowanego użytkownika
+
     // funkcja do wyświetlania przywilejów zalogowanego użytkownika
     public function get_privileges($login)
     {
@@ -238,158 +206,185 @@ class PrivilegeManager_
         }
     }
 
-
-    public function get_all_roles()
+    public function add_privilege($privilege_name)
     {
+        $privilege_name = $this->purifier->purify($privilege_name);
+        $stmt = $this->db->prepare("INSERT INTO privilege(name) VALUES (:privilege_name)");
+        $stmt->bindParam(':privilege_name', $privilege_name);
+
         try {
-            $sql = "SELECT * FROM role";
-            $stmt = $this->db->prepare($sql);
             $stmt->execute();
-            $roles = $stmt->fetchAll();
-            if ($roles) {
-                echo "Role: " . "<br/>";
-                foreach ($roles as $role) {
-                    echo "- " . $role['role_name'] . "<br/>";
+            $this->popup('dodano');
+        } catch (PDOException $ex) {
+
+            throw $ex;
+        }
+    }
+
+    public function add_role($role_name)
+    {
+        $role_name = $this->purifier->purify($role_name);
+        $stmt = $this->db->prepare("INSERT INTO role(role_name) VALUES (:role_name)");
+        $stmt->bindParam(':role_name', $role_name);
+
+        try {
+            $stmt->execute();
+            $this->popup('dodano');
+        } catch (PDOException $ex) {
+
+            throw $ex;
+        }
+    }
+
+    public function delete_privilege($privilege_name)
+    {
+        $privilege_name = $this->purifier->purify($privilege_name);
+        $stmt = $this->db->prepare("DELETE FROM privilege WHERE name = :privilege_name");
+        $stmt->bindParam(':privilege_name', $privilege_name);
+
+        try {
+            $stmt->execute();
+            $this->popup('usunieto');
+        } catch (PDOException $ex) {
+
+            throw $ex;
+        }
+    }
+    public function delete_role($role_name)
+    {
+        $role_name = $this->purifier->purify($role_name);
+        $stmt = $this->db->prepare("DELETE FROM role WHERE role_name = :role_name");
+        $stmt->bindParam(':role_name', $role_name);
+
+        try {
+            $stmt->execute();
+            $this->popup('usunieto');
+        } catch (PDOException $ex) {
+
+            throw $ex;
+        }
+    }
+
+    public function add_role_privilege($role_name, $privilege_name)
+    {
+        $role_name = $this->purifier->purify($role_name);
+        $privilege_name = $this->purifier->purify($privilege_name);
+        $stmt = $this->db->prepare("INSERT INTO role_privilege(role_id, privilege_id) VALUES ((SELECT id FROM role WHERE role_name = :role_name), (SELECT id FROM privilege WHERE name = :privilege_name))");
+        $stmt->bindParam(':role_name', $role_name);
+        $stmt->bindParam(':privilege_name', $privilege_name);
+
+        try {
+            $stmt->execute();
+
+        } catch (PDOException $ex) {
+
+            throw $ex;
+        }
+    }
+
+    public function delete_role_privilege($role_name, $privilege_name)
+    {
+        $role_name = $this->purifier->purify($role_name);
+        $privilege_name = $this->purifier->purify($privilege_name);
+        $stmt = $this->db->prepare("DELETE FROM role_privilege WHERE role_id = (SELECT id FROM role WHERE role_name = :role_name) AND privilege_id = (SELECT id FROM privilege WHERE name = :privilege_name)");
+        $stmt->bindParam(':role_name', $role_name);
+        $stmt->bindParam(':privilege_name', $privilege_name);
+
+        try {
+            $stmt->execute();
+        } catch (PDOException $ex) {
+
+            throw $ex;
+        }
+    }
+
+    public function delete_message($id)
+    {
+        $id = $this->purifier->purify($id);
+        $stmt = $this->db->prepare("DELETE FROM message WHERE id = :id");
+        $stmt->bindParam(':id', $id);
+
+        try {
+            $stmt->execute();
+            $this->popup('usunieto');
+        } catch (PDOException $ex) {
+
+            throw $ex;
+        }
+    }
+
+    public function show_messages()
+    {
+        $stmt = $this->db->prepare("SELECT * FROM message");
+        try {
+            $stmt->execute();
+            $messages = $stmt->fetchAll();
+            if ($messages) {
+                foreach ($messages as $message) {
+                    echo "<div class='message'>";
+                    echo "<div class='message_header'>";
+                    echo "<div class='message_title'>" . $message['title'] . "</div>";
+                    echo "<div class='message_date'>" . $message['date'] . "</div>";
+                    echo "</div>";
+                    echo "<div class='message_content'>" . $message['content'] . "</div>";
+                    echo "<div class='message_author'>" . $message['author'] . "</div>";
+                    echo "<div class='message_delete'><a href='?action=delete_message&id=" . $message['id'] . "'>Usuń</a></div>";
+                    echo "</div>";
                 }
             } else {
-                echo "Brak ról<br/>";
+                echo "Brak wiadomości";
             }
-        } catch (Exception $e) {
-            print 'Exception' . $e->getMessage();
-            echo 'Exception' . $e->getMessage();
+        } catch (PDOException $ex) {
+
+            throw $ex;
         }
-
     }
 
-    public function get_all_privileges()
-    {
 
-        try {
-            $sql = "SELECT * FROM privilege";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute();
-            $privileges = $stmt->fetchAll();
-            if ($privileges) {
-                echo "Przywileje: " . "<br/>";
-                foreach ($privileges as $privilege) {
-                    echo "- " . $privilege['name'] . "<br/>";
-                }
-            } else {
-                echo "Brak przywilejów <br/>";
-            }
-        } catch (Exception $e) {
-            print 'Exception' . $e->getMessage();
-            echo 'Exception' . $e->getMessage();
-        }
 
-    }
 
-    public function show_all_roles_and_privileges()
-    {
-        echo "<hr/>";
-        echo "Role i przywileje: <br/>";
-        $this->get_all_roles();
-        echo "<br/>";
-        $this->get_all_privileges();
-        echo "<hr/>";
-    }
 
-    public function get_roles_with_privileges($login)
-    {
-        $login = $this->purifier->purify($login);
-        try {
-            $sql = "SELECT r.role_name, p.name FROM role r"
-                . " INNER JOIN role_privilege rp ON r.id = rp.id_role"
-                . " INNER JOIN privilege p ON p.id = rp.privilege_id"
-                . " INNER JOIN user_role ur ON ur.id_role = r.id"
-                . " INNER JOIN user u ON u.id = ur.id_user"
-                . " WHERE u.login = :login";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute(['login' => $login]);
-            $data = $stmt->fetchAll();
 
-            foreach ($data as $row) {
-                $role = $row['role_name'];
-                $privilege = $row['name'];
-                $_SESSION[$role][$privilege] = 'YES';
-            }
 
-            $data['status'] = 'success';
-            echo 'Roles and privileges set<br/>';
-            return $data;
-        } catch (Exception $e) {
-            print 'Exception' . $e->getMessage();
-            echo 'Exception' . $e->getMessage();
-        }
 
-        return [
-            'status' => 'failed'
-        ];
-    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     /*
-        function post_new_role($login)
-        {
-
-            try {
-                $db = new PDO('mysql:host=localhost;dbname=news', 'root', '');
-                $role_name = $_POST['role_name'];
-                $description = $_POST['description'];
-
-                $id_role = $role_name;
-
-                $sql = "INSERT INTO role(role_name, description) 
-                VALUES (:role_name, :description)";
-
-                $data = [
-                    'role_name' => $role_name,
-                    'description' => $description
-                ];
-                $db->prepare($sql)->execute($data);
-
-                $id_role = $db->lastInsertId();
-                $issue_time = date("Y-m-d");
-
-                $sql = "INSERT INTO role_privilege(id_role, privilege_id, issue_time, expire_time) 
-                    values (:id_role, :privilege_id, :issue_time, :expire_time)";
-                $data = [
-                    'id_role' => $id_role,
-                    'privilege_id' => $privilege_id,
-                    'issue_time' => $issue_time,
-                    'expire_time' => NULL
-                ];
-
-                $db->prepare($sql)->execute($data);
-
-            } catch (PDOException $e) {
-                echo $e->getMessage();
-            }
-
-        }
-    */
-    // public function get_privileges2($login)
-    // {
-    //     $login = $this->purifier->purify($login);
-    //     try {
-    //         $sql = "SELECT p.id,p.name FROM privilege p"
-    //             . " INNER JOIN user_privilege up ON p.id=up.id_privilege"
-    //             . " INNER JOIN user u ON u.id=up.id_user"
-    //             . " WHERE u.login=:login";
-    //         $stmt = $this->db->prepare($sql);
-    //         $stmt->execute(['login' => $login]);
-    //         $data = $stmt->fetchAll();
-    //         foreach ($data as $row) {
-    //             $privilege = $row['name'];
-    //             $_SESSION[$privilege] = 'YES';
-    //         }
-    //         $data['status'] = 'success';
-    //         return $data;
-    //     } catch (Exception $e) {
-    //         print 'Exception' . $e->getMessage();
-    //     }
-    //     return [
-    //         'status' => 'failed'
-    //     ];
-    // }
-
-
-} // END OF CLASS
+     ****************************************************************************************************
+     ************************************
+     **************************
+     *****************
+     ********
+     */
+} //END OF CLASS

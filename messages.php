@@ -8,7 +8,7 @@ include_once "classes/Page.php";
 include_once "classes/Db.php";
 include_once "classes/Filter.php";
 require './htmlpurifier-4.15.0/library/HTMLPurifier.auto.php';
-include_once 'classes/privileges/Privileges.php';
+include_once 'classes/Privileges.php';
 Page::display_header("Messages");
 
 
@@ -17,6 +17,12 @@ $db = new Db("localhost", "news", "root", "");
 require './htmlpurifier-4.15.0/library/HTMLPurifier.auto.php';
 $config = HTMLPurifier_Config::createDefault();
 $purifier = new HTMLPurifier($config);
+$Priv = new PrivilegeManager_();
+
+if (isset($_REQUEST['delete_message'])) {
+    $id = $_REQUEST['id'];
+    $Priv->delete_message($id);
+}
 
 // Adding new message
 if (isset($_REQUEST['add_message'])) {
@@ -74,6 +80,7 @@ if (isset($_REQUEST['add_message'])) {
     foreach ($messages as $msg):
         echo $msg->id . ". " . $msg->message . "<br>";
     endforeach;
+
     ?>
 </ol>
 
@@ -164,13 +171,27 @@ if (count($messages)) {
     <input type="submit" id="submit" value="Edit message" name="edit_message">
 </form>
 <!--------------------------------------------------------------------->
-
 <hr>
-<P>Navigation</P>
-<?php
-Page::display_navigation();
-?>
+<P>Messages deleting</P>
+<form method="post" action="messages.php">
+    <table>
+        <tr>
+            <td>Input id of message to delete: </td>
+            <td>
+                <label for="id"></label>
+                <input required type="number" name="id" id="id" size="20" />
+            </td>
+        </tr>
+    </table>
+    <input type="submit" id="submit" value="Delete message" name="delete_message">
 
-</body>
 
-</html>
+    <hr>
+    <P>Navigation</P>
+    <?php
+    Page::display_navigation();
+    ?>
+
+    </body>
+
+    </html>
