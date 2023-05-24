@@ -76,9 +76,26 @@ if (isset($_REQUEST['add_message'])) {
     $stmt->execute();
     $messages = $stmt->fetchAll(PDO::FETCH_OBJ);
 
-
+    echo '<table>';
     foreach ($messages as $msg):
-        echo $msg->id . ". " . $msg->message . "<br>";
+        ?>
+        <table>
+            <tr>
+                <td>
+                    <?php echo $msg->id ?>
+                </td>
+                <td>
+                    <?php echo $msg->name ?>
+                </td>
+                <td>
+                    <?php echo $msg->message ?>
+                </td>
+            </tr>
+        </table>
+
+        <?php
+        echo '</table>';
+        //echo $msg->id . ". " . $msg->name . ". " . $msg->message . "<br>";
     endforeach;
 
     ?>
