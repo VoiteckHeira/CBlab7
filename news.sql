@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Czas generowania: 17 Maj 2023, 17:39
+-- Czas generowania: 24 Maj 2023, 11:41
 -- Wersja serwera: 10.4.21-MariaDB
 -- Wersja PHP: 8.0.12
 
@@ -48,7 +48,6 @@ INSERT INTO `message` (`id`, `name`, `type`, `message`, `deleted`) VALUES
 (6, 'Bitcoin price raises', 'public', 'Price of bitcoin reaches new record.', 0),
 (9, 'New Windows announced', 'public', 'A new version of windows was announced. Present buyers of Widows\r\n10 can update the system to the newest version for free.', 0),
 (10, 'edek', 'public', '      Hello my World          ', 0),
-(11, 'test', 'public', ' test', 0),
 (26, 'test', 'public', 'john 552d29f9290b9521e6016c2296fa4511 sF5%gR', 0),
 (27, 'test', 'public', 'anie dcb710a566c2a24c8bfaf83618e728f7 sdfgh54', 0),
 (28, 'test', 'public', 'susie 8c90f286786c7f3b96564e1e88e0ddab j67R', 0),
@@ -61,7 +60,12 @@ INSERT INTO `message` (`id`, `name`, `type`, `message`, `deleted`) VALUES
 (52, 'test\',\'public\',(SELECT CONCAT(email,\' \', hash,\' \', salt) FROM user WHERE 1 LIMIT 1),0);# ', 'public', 'hello', 0),
 (53, 'test\',\'public\',(SELECT CONCAT(login,\' \', hash,\' \', salt) FROM user WHERE 1  LIMIT 1 OFFSET 1),0);# ', 'public', 'test', 0),
 (54, 'test\',\'public\',(SELECT CONCAT(login,\' \', hash,\' \', salt) FROM user WHERE 1  LIMIT 1 OFFSET 1),0);# ', 'public', 'test', 0),
-(82, 'hello', 'public', 'hello', 0);
+(82, 'hello', 'public', 'hello', 0),
+(83, 'test1', 'public', 'test1', 0),
+(84, 'test1', 'public', 'test1', 0),
+(85, 'test2', 'public', 'test2', 0),
+(86, 'test2', 'public', 'test2', 0),
+(87, 'test3', 'public', 'test3', 0);
 
 -- --------------------------------------------------------
 
@@ -97,7 +101,9 @@ INSERT INTO `privilege` (`id`, `id_parent_privilege`, `name`, `active`, `asset_u
 (13, NULL, 'create privilege', 1, '/privileges/create_privilege'),
 (14, NULL, 'delete privilege', 1, '/privileges/delete_privilege'),
 (15, NULL, 'edit privilege', 1, '/privileges/edit_privilege'),
-(16, NULL, 'display privilege', 1, '/privileges/display_privilege');
+(16, NULL, 'display privilege', 1, '/privileges/display_privilege'),
+(17, NULL, 'nowe', NULL, NULL),
+(18, NULL, 'nowe', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -119,7 +125,8 @@ INSERT INTO `role` (`id`, `role_name`, `description`) VALUES
 (1, 'Administrator', 'Manages system settings and user accounts'),
 (2, 'Moderator', 'Moderates discussions and manages users'),
 (3, 'User', 'Standard user role with limited privileges'),
-(4, 'New', 'New user role with limited privileges');
+(4, 'New', 'New user role with limited privileges'),
+(13, 'nowa2', NULL);
 
 -- --------------------------------------------------------
 
@@ -338,19 +345,19 @@ ALTER TABLE `user_role`
 -- AUTO_INCREMENT dla tabeli `message`
 --
 ALTER TABLE `message`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=89;
 
 --
 -- AUTO_INCREMENT dla tabeli `privilege`
 --
 ALTER TABLE `privilege`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT dla tabeli `role`
 --
 ALTER TABLE `role`
-  MODIFY `id` smallint(6) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` smallint(6) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT dla tabeli `role_privilege`
