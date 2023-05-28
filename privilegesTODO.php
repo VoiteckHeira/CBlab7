@@ -126,5 +126,140 @@ call_user_func([$myClass, $function_name]);
 // Użytkownik nie jest zalogowany - przekieruj go na stronę logowania lub wyświetl komunikat o braku dostępu
 }
 
+//Messages v2
+<hr>
+<P> Messages</P>
+<?php
+$where_clause = "";
+// filtering messages+
+if (isset($_REQUEST['filter_messages'])) {
+    $string = $_REQUEST['string'];
+    $where_clause = " and name LIKE '%" . $string . "%'";
+}
+$sql = "SELECT * from message WHERE deleted=0 " . $where_clause;
+echo $sql;
+echo "<BR/><BR/>";
+$messages = $db->select($sql);
+if (count($messages)) {
+    echo '<table>';
+    $counter = 1;
+    foreach ($messages as $msg): //returned as objects
+        ?>
+        <tr>
+            <td>
+                <?php echo $msg->id ?>
+            </td>
+            <td>
+                <?php echo $msg->name ?>
+            </td>
+            <td>
+                <?php echo $msg->message ?>
+            </td>
+            <form method="post" action="message_action.php">
+                <input type="number" name="message_id" id="message_id" value="<?php echo $msg->id ?>" />
+                <?php
+                if (isset($_SESSION['delete message']))
+                    echo '<td><input type="submit" id= "submit" value="Delete" name="delete_message"></td>';
+                if (isset($_SESSION['edit message']))
+                    echo '<td><input type="submit" id= "submit" ="Edit" name="edit_message"></td>';
+                ?>
+            </form>
+        </tr>
+        <?php
+    endforeach;
+    echo '</table>';
+} else {
+    echo "No messages available";
+}
+?>
+
+<td>Privileges</td>
+<td>
+    <label for="privileges"></label>"
+    <?php
+    $where_clause = "";
+    $sql = "SELECT * FROM privilege" . $where_clause;
+    $stmt = $db->pdo->prepare($sql);
+    $stmt->execute();
+    $privileges = $stmt->fetchAll(PDO::FETCH_OBJ);
+    foreach ($privileges as $privilege) {
+        echo '<input required type="radio" id="privilege" name="privilege" value="' . $privilege->id . '">' . $privilege->name . '<br>';
+    }
+    ?>
+</td>
+
 
 */
+
+-- uprawnienia
+id name
+1 add message
+2 delete message
+3 edit message
+4 dispay message
+5 create role
+6 delete role
+7 edit role
+8 display role
+9 create user
+10 delete user
+11 edit user
+12 display user
+13 create privilege
+14 delete privilege
+15 edit privilege
+16 display privilege
+17 nowe
+18 nowe
+
+
+<?php
+$where_clause = "";
+// filtering messages
+if (isset($_REQUEST['filter_messages'])) {
+    $string = $_REQUEST['string'];
+    $type = $_REQUEST['type'];
+    if (in_array($type, ['public', 'private'])) {
+        $where_clause = " WHERE name LIKE :string AND type = :type";
+    }
+}
+
+$sql = "SELECT * from message" . $where_clause; //biala_lista
+$stmt = $db->pdo->prepare($sql);
+if (isset($_REQUEST['filter_messages'])) {
+    $string = "%" . $_REQUEST['string'] . "%";
+    $type = $_REQUEST['type'];
+    if (in_array($type, ['public', 'private'])) {
+        $tttt = Filter::sanitizeData($string, 'str');
+        $ttttt = Filter::sanitizeData($type, 'str');
+        $stmt->bindParam(':string', $tttt);
+        $stmt->bindParam(':type', $ttttt);
+    }
+}
+
+$stmt->execute();
+$messages = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+echo '<table>';
+foreach ($messages as $msg):
+    ?>
+    <table>
+        <tr>
+            <td>
+                <?php echo $msg->id ?>
+            </td>
+            <td>
+                <?php echo $msg->name ?>
+            </td>
+            <td>
+                <?php echo $msg->message ?>
+            </td>
+        </tr>
+    </table>
+
+    <?php
+    echo '</table>';
+    //echo $msg->id . ". " . $msg->name . ". " . $msg->message . "<br>";
+endforeach;
+
+?>

@@ -19,6 +19,55 @@ class PrivilegeManager_
             die();
         }
     }
+
+    /*  NIE DZIAŁA I BUGUJE
+        public function show_thing($login)
+        {
+            $allowed_functions = [
+                'getAllRoles',
+                'add_role',
+                'delete_role',
+                'add_privilege',
+                'delete_privilege',
+                'add_role_privilege',
+                'delete_role_privilege',
+                'get_all_users',
+                'get_role',
+                'check_privileges',
+                'displayRolesAndPrivileges',
+                'add_message',
+                'delete_message',
+                'edit_message',
+                'display_messages',
+            ];
+            $user_permissions = [];
+            $result = $this->check_privileges($login);
+            if ($result['status'] === 'success') {
+                foreach ($result as $key => $value) {
+                    if ($key !== 'status') {
+                        $privilege = $value['name'];
+                        $user_permissions[] = $privilege;
+                    }
+                }
+            } else {
+                echo "Eroor";
+            }
+
+            //$user_permissions = $_SESSION['user_permissions'];
+
+
+
+            foreach ($allowed_functions as $function_name) {
+                if (in_array($function_name, $user_permissions)) {
+                    call_user_func([$this, $function_name], $login);
+                }
+            }
+
+
+        }*/
+
+
+
     public function getAllRoles()
     {
         try {
@@ -59,11 +108,11 @@ class PrivilegeManager_
         if (!empty($roles) && !empty($privileges)) {
             echo "Role:<br>";
             foreach ($roles as $roleId => $roleName) {
-                echo " - $roleName<br>";
+                echo " $roleId. $roleName<br>";
             }
             echo "<br>Przywileje:<br>";
             foreach ($privileges as $privilegeId => $privilegeName) {
-                echo " -- $privilegeName<br>";
+                echo " $privilegeId. $privilegeName<br>";
             }
         } else {
             echo "Brak dostępnych ról i przywilejów.";
@@ -103,11 +152,16 @@ class PrivilegeManager_
             $stmt = $this->db->prepare($sql);
             $stmt->execute(['login' => $login]);
             $data = $stmt->fetchAll();
+            $privileges = [];
+
             foreach ($data as $row) {
                 $privilege = $row['name'];
                 $_SESSION[$privilege] = 'YES';
+                $privileges[] = $privilege;
             }
             $data['status'] = 'success';
+            $data['privileges'] = $privileges;
+
             return $data;
         } catch (Exception $e) {
             print 'Exception' . $e->getMessage();
@@ -140,11 +194,14 @@ class PrivilegeManager_
             $sql = "SELECT * FROM user";
 
             $stmt = $this->db->prepare($sql);
-            $role = $stmt->fetchColumn();
-            if ($role) {
-                echo "Rola: " . $role . "<br/>";
+            $stmt->execute();
+            $user = $stmt->fetchAll();
+            if ($user) {
+                foreach ($user as $us) {
+                    echo $us['id'] . " " . $us['login'] . "<br/>";
+                }
             } else {
-                echo "Brak przypisanej roli dla użytkownika<br/>";
+                echo "Brak użytkownika<br/>";
             }
         } catch (Exception $e) {
             print 'Exception' . $e->getMessage();
@@ -195,7 +252,8 @@ class PrivilegeManager_
             if ($privileges) {
                 echo "Przywilej: " . "<br/>";
                 foreach ($privileges as $privilege) {
-                    echo "- " . $privilege['name'] . "<br/>";
+                    echo "- " . $privilege['id'] . " " . $privilege['name'] . "<br/>";
+
                 }
             } else {
                 echo "Brak przypisanych przywilejów dla użytkownika<br/>";
@@ -269,7 +327,7 @@ class PrivilegeManager_
     {
         $role_name = $this->purifier->purify($role_name);
         $privilege_name = $this->purifier->purify($privilege_name);
-        $stmt = $this->db->prepare("INSERT INTO role_privilege(role_id, privilege_id) VALUES ((SELECT id FROM role WHERE role_name = :role_name), (SELECT id FROM privilege WHERE name = :privilege_name))");
+        $stmt = $this->db->prepare("INSERT INTO role_privilege(id_role, privilege_id) VALUES ((SELECT id FROM role WHERE role_name = :role_name), (SELECT id FROM privilege WHERE name = :privilege_name))");
         $stmt->bindParam(':role_name', $role_name);
         $stmt->bindParam(':privilege_name', $privilege_name);
 
@@ -286,12 +344,139 @@ class PrivilegeManager_
     {
         $role_name = $this->purifier->purify($role_name);
         $privilege_name = $this->purifier->purify($privilege_name);
-        $stmt = $this->db->prepare("DELETE FROM role_privilege WHERE role_id = (SELECT id FROM role WHERE role_name = :role_name) AND privilege_id = (SELECT id FROM privilege WHERE name = :privilege_name)");
+        $stmt = $this->db->prepare("DELETE FROM role_privilege WHERE id_role = (SELECT id FROM role WHERE role_name = :role_name) AND privilege_id = (SELECT id FROM privilege WHERE name = :privilege_name)");
         $stmt->bindParam(':role_name', $role_name);
         $stmt->bindParam(':privilege_name', $privilege_name);
 
         try {
             $stmt->execute();
+        } catch (PDOException $ex) {
+
+            throw $ex;
+        }
+    }
+
+    public function add_user_role($login, $role_name)
+    {
+        $login = $this->purifier->purify($login);
+        $role_name = $this->purifier->purify($role_name);
+        $stmt = $this->db->prepare("INSERT INTO user_role(id_user, id_role) VALUES ((SELECT id FROM user WHERE login = :login), (SELECT id FROM role WHERE role_name = :role_name))");
+        $stmt->bindParam(':login', $login);
+        $stmt->bindParam(':role_name', $role_name);
+
+        //$stmt = $this->db->prepare("INSERT INTO user_privilege(id_user, id_privilege) VALUES ((SELECT id FROM user WHERE login = :login), (SELECT id FROM privilege WHERE )");
+        try {
+            $stmt->execute();
+        } catch (PDOException $ex) {
+            echo "Nie można dodać roli do użytkownika";
+            echo $ex;
+            throw $ex;
+        }
+    }
+
+    public function delete_user_role($login, $role_name)
+    {
+        $login = $this->purifier->purify($login);
+        $role_name = $this->purifier->purify($role_name);
+        $stmt = $this->db->prepare("DELETE FROM user_role WHERE id_user = (SELECT id FROM user WHERE login = :login) AND id_role = (SELECT id FROM role WHERE role_name = :role_name)");
+        $stmt->bindParam(':login', $login);
+        $stmt->bindParam(':role_name', $role_name);
+
+        try {
+            $stmt->execute();
+        } catch (PDOException $ex) {
+
+            throw $ex;
+        }
+    }
+
+    public function add_user_privilege($login, $privilege_name)
+    {
+        $login = $this->purifier->purify($login);
+        $privilege_name = $this->purifier->purify($privilege_name);
+        $stmt = $this->db->prepare("INSERT INTO user_privilege(id_user, id_privilege) VALUES ((SELECT id FROM user WHERE login = :login), (SELECT id FROM privilege WHERE name = :privilege_name))");
+        $stmt->bindParam(':login', $login);
+        $stmt->bindParam(':privilege_name', $privilege_name);
+
+        try {
+            $stmt->execute();
+        } catch (PDOException $ex) {
+
+            throw $ex;
+        }
+    }
+
+    public function delete_user_privilege($login, $privilege_name)
+    {
+        $login = $this->purifier->purify($login);
+        $privilege_name = $this->purifier->purify($privilege_name);
+        $stmt = $this->db->prepare("DELETE FROM user_privilege WHERE id_user = (SELECT id FROM user WHERE login = :login) AND id_privilege = (SELECT id FROM privilege WHERE name = :privilege_name)");
+        $stmt->bindParam(':login', $login);
+        $stmt->bindParam(':privilege_name', $privilege_name);
+
+        try {
+            $stmt->execute();
+        } catch (PDOException $ex) {
+
+            throw $ex;
+        }
+    }
+
+
+
+
+    public function show_messages()
+    {
+        $stmt = $this->db->prepare("SELECT * FROM message");
+        try {
+            $where_clause = "";
+            // filtering messages
+            if (isset($_REQUEST['filter_messages'])) {
+                $string = $_REQUEST['string'];
+                $type = $_REQUEST['type'];
+                if (in_array($type, ['public', 'private'])) {
+                    $where_clause = " WHERE name LIKE :string AND type = :type";
+                }
+            }
+
+            $sql = "SELECT * from message" . $where_clause; //biala_lista
+            $stmt = $this->db->prepare($sql);
+            if (isset($_REQUEST['filter_messages'])) {
+                $string = "%" . $_REQUEST['string'] . "%";
+                $type = $_REQUEST['type'];
+                if (in_array($type, ['public', 'private'])) {
+                    $tttt = Filter::sanitizeData($string, 'str');
+                    $ttttt = Filter::sanitizeData($type, 'str');
+                    $stmt->bindParam(':string', $tttt);
+                    $stmt->bindParam(':type', $ttttt);
+                }
+            }
+
+            $stmt->execute();
+            $messages = $stmt->fetchAll(PDO::FETCH_OBJ);
+
+            echo '<table>';
+            foreach ($messages as $msg):
+                ?>
+                <table>
+                    <tr>
+                        <td>
+                            <?php echo $msg->id ?>
+                        </td>
+                        <td>
+                            <?php echo $msg->name ?>
+                        </td>
+                        <td>
+                            <?php echo $msg->message ?>
+                        </td>
+                    </tr>
+                </table>
+
+                <?php
+                echo '</table>';
+
+            endforeach;
+
         } catch (PDOException $ex) {
 
             throw $ex;
@@ -312,35 +497,6 @@ class PrivilegeManager_
             throw $ex;
         }
     }
-
-    public function show_messages()
-    {
-        $stmt = $this->db->prepare("SELECT * FROM message");
-        try {
-            $stmt->execute();
-            $messages = $stmt->fetchAll();
-            if ($messages) {
-                foreach ($messages as $message) {
-                    echo "<div class='message'>";
-                    echo "<div class='message_header'>";
-                    echo "<div class='message_title'>" . $message['title'] . "</div>";
-                    echo "<div class='message_date'>" . $message['date'] . "</div>";
-                    echo "</div>";
-                    echo "<div class='message_content'>" . $message['content'] . "</div>";
-                    echo "<div class='message_author'>" . $message['author'] . "</div>";
-                    echo "<div class='message_delete'><a href='?action=delete_message&id=" . $message['id'] . "'>Usuń</a></div>";
-                    echo "</div>";
-                }
-            } else {
-                echo "Brak wiadomości";
-            }
-        } catch (PDOException $ex) {
-
-            throw $ex;
-        }
-    }
-
-
 
 
 

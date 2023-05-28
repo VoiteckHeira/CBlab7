@@ -116,6 +116,7 @@ if (isset($_REQUEST['change_password'])) {
                     }
                     ?>
                 </td>
+
             </tr>
             <tr>
             <tr>

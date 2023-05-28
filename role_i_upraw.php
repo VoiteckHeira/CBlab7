@@ -45,24 +45,65 @@ $Priv->displayRolesAndPrivileges();
 if (isset($_REQUEST['add_role'])) {
     $role = $_REQUEST['role'];
     $Priv->add_role($role);
+    
 }
 
 //czesc do przeslania do funkcji - uprawnienia
 if (isset($_REQUEST['add_privilege'])) {
     $privilege = $_REQUEST['privilege'];
     $Priv->add_privilege($privilege);
+    
 }
 
+
+if (isset($_REQUEST['delete_privilege'])) {
+    $privilege = $_REQUEST['privilege'];
+    $Priv->delete_privilege($privilege);
+
+}
+
+if (isset($_REQUEST['delete_role'])) {
+    $role = $_REQUEST['role'];
+    $Priv->delete_role($role);
+
+}
 if (isset($_REQUEST['add_role_privilege'])) {
     $role = $_REQUEST['role'];
     $privilege = $_REQUEST['privilege'];
     $Priv->add_role_privilege($role, $privilege);
 }
 
-if (isset($_REQUEST['delete_privilege'])) {
+if (isset($_REQUEST['delete_role_privilege'])) {
+    $role = $_REQUEST['role'];
     $privilege = $_REQUEST['privilege'];
-    $Priv->delete_privilege($privilege);
+    $Priv->delete_role_privilege($role, $privilege);
 }
+
+if (isset($_REQUEST['add_user_role'])) {
+    $login = $_REQUEST['login'];
+    $role = $_REQUEST['role'];
+    $Priv->add_user_role($login, $role);
+}
+
+if (isset($_REQUEST['delete_user_role'])) {
+    $login = $_REQUEST['login'];
+    $role = $_REQUEST['role'];
+    $Priv->delete_user_role($login, $role);
+}
+
+if (isset($_REQUEST['add_user_privilege'])) {
+    $login = $_REQUEST['login'];
+    $privilege = $_REQUEST['privilege'];
+    $Priv->add_user_privilege($login, $privilege);
+}
+
+if (isset($_REQUEST['delete_user_privilege'])) {
+    $login = $_REQUEST['login'];
+    $privilege = $_REQUEST['privilege'];
+    $Priv->delete_user_privilege($login, $privilege);
+}
+
+
 ?>
 
 <!DOCTYPE html>

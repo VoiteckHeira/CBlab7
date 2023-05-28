@@ -1,6 +1,7 @@
 <?php
 include_once "session.php";
 make_session();
+$login = $_SESSION['login'];
 ?>
 
 <?php
@@ -50,103 +51,14 @@ if (isset($_REQUEST['add_message'])) {
 <P> Messages</P>
 <ol>
     <?php
-    $where_clause = "";
-    // filtering messages
-    if (isset($_REQUEST['filter_messages'])) {
-        $string = $_REQUEST['string'];
-        $type = $_REQUEST['type'];
-        if (in_array($type, ['public', 'private'])) {
-            $where_clause = " WHERE name LIKE :string AND type = :type";
-        }
-    }
-
-    $sql = "SELECT * from message" . $where_clause; //biala_lista
-    $stmt = $db->pdo->prepare($sql);
-    if (isset($_REQUEST['filter_messages'])) {
-        $string = "%" . $_REQUEST['string'] . "%";
-        $type = $_REQUEST['type'];
-        if (in_array($type, ['public', 'private'])) {
-            $tttt = Filter::sanitizeData($string, 'str');
-            $ttttt = Filter::sanitizeData($type, 'str');
-            $stmt->bindParam(':string', $tttt);
-            $stmt->bindParam(':type', $ttttt);
-        }
-    }
-
-    $stmt->execute();
-    $messages = $stmt->fetchAll(PDO::FETCH_OBJ);
-
-    echo '<table>';
-    foreach ($messages as $msg):
-        ?>
-        <table>
-            <tr>
-                <td>
-                    <?php echo $msg->id ?>
-                </td>
-                <td>
-                    <?php echo $msg->name ?>
-                </td>
-                <td>
-                    <?php echo $msg->message ?>
-                </td>
-            </tr>
-        </table>
-
-        <?php
-        echo '</table>';
-        //echo $msg->id . ". " . $msg->name . ". " . $msg->message . "<br>";
-    endforeach;
+    $Priv->show_messages();
+    echo "<hr />";
 
     ?>
 </ol>
 
 <!---------------------------------------------------------------------->
-<hr>
-<P> Messages</P>
-<?php
-$where_clause = "";
-// filtering messages+
-if (isset($_REQUEST['filter_messages'])) {
-    $string = $_REQUEST['string'];
-    $where_clause = " and name LIKE '%" . $string . "%'";
-}
-$sql = "SELECT * from message WHERE deleted=0 " . $where_clause;
-echo $sql;
-echo "<BR/><BR/>";
-$messages = $db->select($sql);
-if (count($messages)) {
-    echo '<table>';
-    $counter = 1;
-    foreach ($messages as $msg): //returned as objects
-        ?>
-        <tr>
-            <td>
-                <?php echo $msg->id ?>
-            </td>
-            <td>
-                <?php echo $msg->name ?>
-            </td>
-            <td>
-                <?php echo $msg->message ?>
-            </td>
-            <form method="post" action="message_action.php">
-                <input type="number" name="message_id" id="message_id" value="<?php echo $msg->id ?>" />
-                <?php
-                if (isset($_SESSION['delete message']))
-                    echo '<td><input type="submit" id= "submit" value="Delete" name="delete_message"></td>';
-                if (isset($_SESSION['edit message']))
-                    echo '<td><input type="submit" id= "submit" ="Edit" name="edit_message"></td>';
-                ?>
-            </form>
-        </tr>
-        <?php
-    endforeach;
-    echo '</table>';
-} else {
-    echo "No messages available";
-}
-?>
+
 
 
 <!---------------------------------------------------------------------->
